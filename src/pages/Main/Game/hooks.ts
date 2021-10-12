@@ -1,21 +1,28 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   addToguessed,
   clearOpened,
   closeCard,
   fillBoard,
+  finishGame,
   openedCardValueSelector,
+  selectGuessed
 } from '../../../features/memory/memorySlice';
 import { useAppDispatch, useAppSelector } from './../../../app/hooks';
 import {
   selectIds,
-  selectOpened,
+  selectOpened
 } from './../../../features/memory/memorySlice';
 export const useGame = () => {
   const dispatch = useAppDispatch();
   const cardIds = useAppSelector(selectIds);
   const openedCards = useAppSelector(selectOpened);
+  const guessedCards = useAppSelector(selectGuessed);
   const openedCardsValues = useAppSelector(openedCardValueSelector);
+
+  const closeCards = useCallback(() => {
+    openedCards.map((id) => dispatch(closeCard({ id })));
+  }, [dispatch, openedCards]);
 
   useEffect(() => {
     if (openedCards.length !== 2) {
@@ -29,14 +36,20 @@ export const useGame = () => {
     } else {
       dispatch(clearOpened());
       setTimeout(() => {
-        openedCards.map((id) => dispatch(closeCard({ id })));
+        closeCards();
       }, 500);
     }
-  }, [dispatch, openedCards, openedCards.length, openedCardsValues]);
+  }, [closeCards, dispatch, openedCards, openedCardsValues]);
 
   useEffect(() => {
     dispatch(fillBoard());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (guessedCards.length === 36) {
+      dispatch(finishGame());
+    }
+  }, [dispatch, guessedCards.length]);
 
   return { cardIds };
 };

@@ -4,11 +4,14 @@ import { RootState } from '../../app/store';
 import { getCards } from './cardContent';
 
 export interface MemoryState {
+  playerName: string;
   status: 'idle' | 'playing' | 'finished';
   cards: Cards;
   ids: number[];
   guessedСards: number[];
   openedСards: number[];
+  results: { name: string; time: string }[];
+  timePassed: string;
 }
 
 type Cards = Record<string, Card>;
@@ -25,6 +28,9 @@ const initialState: MemoryState = {
   ids: [],
   guessedСards: [],
   openedСards: [],
+  results: [],
+  playerName: '',
+  timePassed: '',
 };
 
 export const memorySlice = createSlice({
@@ -66,15 +72,50 @@ export const memorySlice = createSlice({
         guessedСards: [...ids, ...state.guessedСards],
       };
     },
+    startGame: (state) => {
+      state.status = 'playing';
+    },
+    finishGame: (state) => {
+      state.status = 'finished';
+      state.results.push({ name: state.playerName, time: state.timePassed });
+      state.timePassed = '';
+      state.guessedСards = [];
+    },
+
+    setName: (
+      state,
+      { payload: { name } }: PayloadAction<{ name: string }>
+    ) => {
+      state.playerName = name;
+    },
+
+    setTimePassed: (
+      state,
+      { payload: { time } }: PayloadAction<{ time: string }>
+    ) => {
+      state.timePassed = time;
+    },
   },
 });
 
-export const { openCard, closeCard, fillBoard, clearOpened, addToguessed } =
-  memorySlice.actions;
+export const {
+  startGame,
+  openCard,
+  closeCard,
+  fillBoard,
+  clearOpened,
+  addToguessed,
+  finishGame,
+  setName,
+  setTimePassed,
+} = memorySlice.actions;
 export const selectCards = (state: RootState) => state.memory.cards;
 export const selectIds = (state: RootState) => state.memory.ids;
 export const selectOpened = (state: RootState) => state.memory.openedСards;
 export const selectGuessed = (state: RootState) => state.memory.guessedСards;
+export const selectStatus = (state: RootState) => state.memory.status;
+export const selectPlayerName = (state: RootState) => state.memory.playerName;
+export const selectResults = (state: RootState) => state.memory.results;
 
 export const cardArraySelector = createSelector(
   selectCards,
