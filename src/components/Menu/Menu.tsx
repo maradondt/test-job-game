@@ -61,8 +61,6 @@ export const Menu: React.FC<Props> = ({
                   {results.map(({ name, time }, i) => {
                     return (
                       <li key={i}>
-                        {i + 1}
-                        {': '}
                         {name}
                         {' - '}
                         {time}
